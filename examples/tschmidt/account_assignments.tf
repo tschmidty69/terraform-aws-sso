@@ -13,6 +13,11 @@ module "sso_account_assignments" {
       accounts            = local.all_account_ids,
       permission_set_name = "AdministratorAccess",
       principal_name      = "Administrators"
-    }  
+    },
+    {
+      accounts            = local.all_account_ids,
+      permission_set_name = "ReadOnly",
+      principal_name      = "ReadOnlyUsers"
+    },
   ]
 }
