@@ -10,8 +10,7 @@ Some english-language examples of this would be:
 
 ## Usage
 
-**IMPORTANT:** The `master` branch is used in `source` just as an example. In your code, do not pin to `master` because there may be breaking changes between releases.
-Instead pin to the release tag (e.g. `?ref=tags/x.y.z`) of one of our [latest releases](https://github.com/cloudposse/terraform-aws-sso/releases).
+Code based on (https://github.com/cloudposse/terraform-aws-sso/).
 
 For a complete example, see [examples/complete](/examples/complete).
 
@@ -21,23 +20,20 @@ module "sso_account_assignments" {
 
   account_assignments = [
     {
-        account = "111111111111",
+        account = "1",
         permission_set_arn = "arn:aws:sso:::permissionSet/ssoins-0000000000000000/ps-31d20e5987f0ce66",
-        permission_set_name = "Administrators",
         principal_type = "GROUP",
         principal_name = "Administrators"
     },
     {
-        account = "111111111111",
+        account = "1",
         permission_set_arn = "arn:aws:sso:::permissionSet/ssoins-0000000000000000/ps-955c264e8f20fea3",
-        permission_set_name = "Developers",
         principal_type = "GROUP",
         principal_name = "Developers"
     },
     {
-        account = "222222222222",
+        account = "2",
         permission_set_arn = "arn:aws:sso:::permissionSet/ssoins-0000000000000000/ps-31d20e5987f0ce66",
-        permission_set_name = "Developers",
         principal_type = "GROUP",
         principal_name = "Developers"
     },

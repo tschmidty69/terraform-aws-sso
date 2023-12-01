@@ -6,8 +6,7 @@ Permission sets are stored in AWS SSO and are only used for AWS accounts. They a
 
 ## Usage
 
-**IMPORTANT:** The `master` branch is used in `source` just as an example. In your code, do not pin to `master` because there may be breaking changes between releases.
-Instead pin to the release tag (e.g. `?ref=tags/x.y.z`) of one of our [latest releases](https://github.com/cloudposse/terraform-aws-sso/releases).
+Code based on (https://github.com/cloudposse/terraform-aws-sso/).
 
 For a complete example, see [examples/complete](/examples/complete).
 

@@ -1,7 +1,19 @@
-resource "null_resource" "dependency" {
-  triggers = {
-    dependency_id = join(",", var.identitystore_group_depends_on)
-  }
+locals {
+  # assignment_map = {
+  #   for a in var.account_assignments :
+  #   format("%v-%v-%v-%v", a.account, substr(a.principal_type, 0, 1), a.principal_name, a.permission_set_name) => a
+  # }
+  assignment_map = flatten([ for a in var.account_assignments : 
+      [ for account in a.accounts :  
+          {
+            account             = account
+            permission_set_arn  = a.permission_set_arn == "" ? var.permission_sets[a.permission_set_name].arn : a.permission_set_arn
+            permission_set_name = a.permission_set_name
+            principal_name      = a.principal_name
+            principal_type      = a.principal_type
+          }
+      ]
+  ])
 }
 
 data "aws_identitystore_group" "this" {
@@ -14,34 +26,25 @@ data "aws_identitystore_group" "this" {
       attribute_value = each.key
     }
   }
-
-  depends_on = [null_resource.dependency]
 }
 
 data "aws_identitystore_user" "this" {
   for_each          = local.user_list
   identity_store_id = local.identity_store_id
 
-  alternate_identifier {
-    unique_attribute {
-      attribute_path  = "UserName"
-      attribute_value = each.key
-    }
-  }
-
-  depends_on = [null_resource.dependency]
-}
-
-locals {
-  assignment_map = {
-    for a in var.account_assignments :
-    format("%v-%v-%v-%v", a.account, substr(a.principal_type, 0, 1), a.principal_name, a.permission_set_name) => a
+  filter {
+    attribute_path  = "UserName"
+    attribute_value = each.key
   }
 }
+
 
 resource "aws_ssoadmin_account_assignment" "this" {
-  for_each = local.assignment_map
-
+  for_each = {
+    for i, a in local.assignment_map:
+      format("%v-%v-%v-%v", a.account, substr(a.principal_type, 0, 1), a.principal_name, a.permission_set_name) => a
+  }
+  
   instance_arn       = local.sso_instance_arn
   permission_set_arn = each.value.permission_set_arn
 
@@ -52,8 +55,6 @@ resource "aws_ssoadmin_account_assignment" "this" {
   target_type = "AWS_ACCOUNT"
 }
 
-
-
 #-----------------------------------------------------------------------------------------------------------------------
 # LOCAL VARIABLES AND DATA SOURCES
 #-----------------------------------------------------------------------------------------------------------------------
@@ -63,7 +64,7 @@ locals {
   identity_store_id = tolist(data.aws_ssoadmin_instances.this.identity_store_ids)[0]
   sso_instance_arn  = tolist(data.aws_ssoadmin_instances.this.arns)[0]
 
-  group_list = toset([for mapping in var.account_assignments : mapping.principal_name if mapping.principal_type == "GROUP"])
-  user_list  = toset([for mapping in var.account_assignments : mapping.principal_name if mapping.principal_type == "USER"])
+  group_list      = toset([for mapping in var.account_assignments : mapping.principal_name if mapping.principal_type == "GROUP"])
+  user_list       = toset([for mapping in var.account_assignments : mapping.principal_name if mapping.principal_type == "USER"])
 }
 
